@@ -42,7 +42,7 @@ genres = {
 def movie_names(genre, pages):
     movies = []
     for page in range(0, 200): #the api returns only 1 page (loop to get other pages)
-        url = f"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres={genres[genre]}"
+        url = f"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page={page+1}&sort_by=popularity.desc&with_genres={genres[genre]}"
         headers = {
         "accept": "application/json",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkM2ViZjYwNWRhNmRjOGQ2ZWY0MTE3NjBlYjY3ZmE0YyIsInN1YiI6IjY1ZTljMjQ1NmEyMjI3MDE4Njk2NmM5MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.dozyRSZ-_MPi-sWqQSuYQloqtotrDLMZM3Wq4lgdM-4"
@@ -62,8 +62,8 @@ def decide_movie(user_request):
 
     elif user_request.lower() is "movie":
         genre = input("Which kind of movie do you like?").capitalize()
-        movies = movie_names(genre, 200)
-        rnd_movie = random.choice(movies)
+        movie_list = movie_names(genre, 200)
+        rnd_movie = random.choice(movie_list)
         print("You should watch", rnd_movie)
 
 
