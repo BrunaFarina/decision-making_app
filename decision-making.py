@@ -53,22 +53,16 @@ def movie_names(genre, pages):
             movies.append(dictionary['title'])
     return movies
 
-def decide_movie(user_request):
-    user_request = input("What do you want me to choose for you? Movie or Food?")
-
-    if user_request.lower() is "food":
+def decide_for_me(user_request):
+    if user_request.lower() == "food":
         rnd_food = random.choice(foods)
         print("I think you should eat", rnd_food, "today")
 
-    elif user_request.lower() is "movie":
+    elif user_request.lower() == "movie":
         genre = input("Which kind of movie do you like?").capitalize()
         movie_list = movie_names(genre, 200)
         rnd_movie = random.choice(movie_list)
         print("You should watch", rnd_movie)
 
-
-
-
-
-
-
+user_request = input("What do you want me to choose for you? Movie or Food?")
+decide_for_me(user_request)
