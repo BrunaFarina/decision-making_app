@@ -4,19 +4,23 @@
 #   Ref: https://developer.themoviedb.org
 
 
-### NOTAS:
+### NOTES:
 # add more foods
 # replace loops for list comprehension
 # do I need the "genres" obj?
-# replace "elif user_request.lower() is "movie":" for "else"?
+# replace "elif user_request.lower() is "movie":" for "else"? - DONE
+# it's returning other movies other than the specified genre (ex: I want comedy; it also returns drama/comedy) - DONE
+# rank by rate instead of popularity - DONE (but realized rate returns shit movies. Back to popularity, but add a rate filter) - DONE
+#problem: some movies have similar/same name, it's better to return also the year (or director name) to have some more info - DONE
 
 import requests
 import random
 import json
 
-#dict of foods
+# dict of foods
 foods = ["pasta", "pizza", "hamburger", "sushi", "indian_food", "mexican food"]
 
+# dict of movie genres (from TMDB)
 genres = {
     "Action": 28,
     "Adventure": 12,
@@ -40,29 +44,34 @@ genres = {
 }
 
 def movie_names(genre, pages):
-    movies = []
-    for page in range(0, 200): #the api returns only 1 page (loop to get other pages)
-        url = f"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page={page+1}&sort_by=popularity.desc&with_genres={genres[genre]}"
+    movies = [] #empty list to store movie names
+    merged_list = [] # empty list to store list of dictionaries
+    desirable_genre = genres.pop(genre) # remove the desirable movie genre from "genres" dict and store its key
+    for page in range(0, pages): #the api returns only 1 page (loop to get other pages)
+        url = (f"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page={page+1}&"
+               f"sort_by=popularity.desc&vote_average.gte=5&vote_average.lte=10&with_genres={desirable_genre}&"
+               f"without_genres={', '.join(str(x) for x in genres.values())}") #convert dict values to a str
         headers = {
         "accept": "application/json",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkM2ViZjYwNWRhNmRjOGQ2ZWY0MTE3NjBlYjY3ZmE0YyIsInN1YiI6IjY1ZTljMjQ1NmEyMjI3MDE4Njk2NmM5MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.dozyRSZ-_MPi-sWqQSuYQloqtotrDLMZM3Wq4lgdM-4"
         }
         response = requests.get(url, headers=headers)
         data = json.loads(response.text)
-        for dictionary in data['results']:
-            movies.append(dictionary['title'])
-    return movies
+        merged_list = merged_list + data['results']
+    return merged_list
 
 def decide_for_me(user_request):
     if user_request.lower() == "food":
         rnd_food = random.choice(foods)
-        print("I think you should eat", rnd_food, "today")
+        print("I think you should have", rnd_food, "today")
 
-    elif user_request.lower() == "movie":
+    else:
         genre = input("Which kind of movie do you like?").capitalize()
-        movie_list = movie_names(genre, 200)
+        movie_list = movie_names(genre, 10) #each page returns 20 movies
         rnd_movie = random.choice(movie_list)
-        print("You should watch", rnd_movie)
+        print(f"I think you should watch '{rnd_movie['title']}', released on {rnd_movie['release_date']}")
 
-user_request = input("What do you want me to choose for you? Movie or Food?")
-decide_for_me(user_request)
+user_request = input("What do you want me to choose for you: movie or food?")
+
+if __name__ == '__main__':
+    decide_for_me(user_request)
