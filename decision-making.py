@@ -21,7 +21,7 @@ import json
 foods = ["pasta", "pizza", "hamburger", "sushi", "indian_food", "mexican food"]
 
 # dict of movie genres (from TMDB)
-genres = {
+tmdb_genres = {
     "Action": 28,
     "Adventure": 12,
     "Animation": 16,
@@ -46,11 +46,17 @@ genres = {
 def movie_names(genre, pages):
     movies = [] #empty list to store movie names
     merged_list = [] # empty list to store list of dictionaries
-    desirable_genre = genres.pop(genre) # remove the desirable movie genre from "genres" dict and store its key
+
+    # remove the desirable movie genre from "genres" dict and store its key
+    if "," in genre:
+        desirable_genre = [tmdb_genres.pop(item) for item in genre]
+        desirable_genre = ",".join(str(id) for id in desirable_genre)
+    else:
+        desirable_genre = tmdb_genres.pop(genre)
     for page in range(0, pages): #the api returns only 1 page (loop to get other pages)
         url = (f"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page={page+1}&"
                f"sort_by=popularity.desc&vote_average.gte=5&vote_average.lte=10&with_genres={desirable_genre}&"
-               f"without_genres={', '.join(str(x) for x in genres.values())}") #convert dict values to a str
+               f"without_genres={', '.join(str(x) for x in tmdb_genres.values())}") #convert dict values to a str
         headers = {
         "accept": "application/json",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkM2ViZjYwNWRhNmRjOGQ2ZWY0MTE3NjBlYjY3ZmE0YyIsInN1YiI6IjY1ZTljMjQ1NmEyMjI3MDE4Njk2NmM5MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.dozyRSZ-_MPi-sWqQSuYQloqtotrDLMZM3Wq4lgdM-4"
@@ -65,13 +71,23 @@ def decide_for_me(user_request):
         rnd_food = random.choice(foods)
         print("I think you should have", rnd_food, "today")
 
-    else:
-        genre = input("Which kind of movie do you like?").capitalize()
-        movie_list = movie_names(genre, 10) #each page returns 20 movies
+    elif user_request.lower() == "movie":
+        genres = input("Which kind of movie do you like? ")
+
+        if "," in genres:
+            genres = list(genres.split(", "))
+            genres = [genre.title() for genre in genres]
+        else:
+            genres = genres.capitalize()
+
+        movie_list = movie_names(genres, 5) #each page returns 20 movies
         rnd_movie = random.choice(movie_list)
         print(f"I think you should watch '{rnd_movie['title']}', released on {rnd_movie['release_date']}")
 
-user_request = input("What do you want me to choose for you: movie or food?")
+    else:
+        print("This is not 'food' or 'movie'")
+
+user_request = input("What do you want me to choose for you: movie or food? ")
 
 if __name__ == '__main__':
     decide_for_me(user_request)
